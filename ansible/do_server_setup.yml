@@ -1,0 +1,39 @@
+---
+- hosts: digitalocean
+  name: DigitalOcean
+
+  tasks:
+  - name: add user
+    user:
+      name: trauma
+      state: present
+      groups:
+        - sudo
+      shell: /bin/bash
+      home: /home/trauma
+      createhome: yes
+      system: yes
+      
+  - name: add ssh key
+    authorized_key:
+      user: trauma
+      key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+      state: present
+      
+  - name: update apt
+    apt:
+      update_cache: yes
+
+  - name: update server
+    apt:
+      upgrade: yes
+      update_cache: yes
+  
+  - name: reboot server
+    reboot:
+      msg: "Reboot Initiated"
+      connect_timeout: 5
+      reboot_timeout: 600
+      pre_reboot_delay: 0
+      post_reboot_delay: 0
+      test_command: uptime
